@@ -5,6 +5,11 @@
 
 #include "NBody.h"
 #include <math.h>
+#include <cmath>
+
+#include <iostream>
+
+using namespace std;
 
 
 double getRandom(double min, double max)
@@ -33,15 +38,16 @@ void rasterize(struct body *bodies, unsigned char *buffer)
 	for (auto i = 0; i < NUM_BODIES; i++)
 	{
 		// make sure body->x and y is between [-1,1]
-		if (bodies[i].x < -1 || bodies[i].x > 1 || bodies[i].y < -1 || bodies[i].y > 1)
-		{
-			continue;
-		}
-		int x = (int) SCREEN_WIDTH * (bodies[i].x + 1) / 2.0;
-		int y = (int) SCREEN_HEIGHT * (bodies[i].y + 1) / 2.0;
-		buffer[x * SCREEN_WIDTH * 3 + y * 3 + 0] = 255;
-		buffer[x * SCREEN_WIDTH * 3 + y * 3 + 1] = 255;
-		buffer[x * SCREEN_WIDTH * 3 + y * 3 + 2] = 255;
+//		if (bodies[i].x <= -1 || bodies[i].x >= 1 || bodies[i].y <= -1 || bodies[i].y >= 1)
+//		{
+//			continue;
+//		}
+		int x = (int) lround(SCREEN_WIDTH * ((bodies[i].x + 1) / 2.0));
+		int y = (int) lround(SCREEN_HEIGHT * ((bodies[i].y + 1) / 2.0));
+		// cout << x << ',' << y << endl;
+		buffer[x * SCREEN_WIDTH * 3 + y * 3 + 0] = 0XFF;
+		buffer[x * SCREEN_WIDTH * 3 + y * 3 + 1] = 0XFF;
+		buffer[x * SCREEN_WIDTH * 3 + y * 3 + 2] = 0XFF;
 	}
 
 
@@ -101,6 +107,12 @@ void NBodyTimestepCuda(struct body *bodies, double rx, double ry, bool cursor)
 	\param cursor Enable the mouse interaction if true (adding a weight = cursor_weight body in the computation).
 	*/
 	double timeStep = 1;
+	body cursorBody;
+	cursorBody.m =
+			cursor_weight * (double) cursor; // convert bool condition to scale multiply to avoid branch selection
+	cursorBody.x = rx;
+	cursorBody.y = ry;
+	cursorBody.vx = cursorBody.vy = 0;
 	for (auto i = 0; i < NUM_BODIES; i++)
 	{
 		bodies[i].x += bodies[i].vx * timeStep;
@@ -116,7 +128,21 @@ void NBodyTimestepCuda(struct body *bodies, double rx, double ry, bool cursor)
 			a.x += aj.x;
 			a.y += aj.y;
 		}
+		vector2d aj = gravitationalAcceleration(&bodies[i], &cursorBody);
+		a.x += aj.x;
+		a.y += aj.y;
 		bodies[i].vx += a.x * timeStep;
 		bodies[i].vy += a.y * timeStep;
+		// solve boundary problem
+		if (bodies[i].x > 1 || bodies[i].x < -1)
+		{
+			bodies[i].x = bodies[i].x > 0 ? 1.0 : -1.0;
+			bodies[i].vx *= -collision_damping;
+		}
+		if (bodies[i].y > 1 || bodies[i].y < -1)
+		{
+			bodies[i].y = bodies[i].y > 0 ? 1.0 : -1.0;
+			bodies[i].vy *= -collision_damping;
+		}
 	}
 }

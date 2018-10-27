@@ -8,7 +8,7 @@ const int SCREEN_HEIGHT = 480;
 
 // numbers of bodies in the simulation 
 //const int NUM_BODIES = 8192;
-const int NUM_BODIES = 256;
+const int NUM_BODIES = 768;
 
 // the body structure
 struct body {
@@ -16,7 +16,6 @@ struct body {
     double y;    // the y position
     double vx;    // the x-axis velocity
     double vy;    // the y-axis velocity
-
     double m;    // the body mass
 };
 

@@ -3,12 +3,14 @@
 #include <string>
 #include <sstream>
 #include <time.h>
-
 #include "main.h"
 #include "LTexture.h"
+#include <iostream>
 
+using namespace std;
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
 	// Initialize PRNG
 	srand((unsigned int) time(NULL));
@@ -69,16 +71,15 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		// prepare the materials for rendering
-		// the main canvas (reading from memory)
+		// prepare the materials for rendering the main canvas (reading from memory)
 		LTexture canvasTexture;
 		canvasTexture.setRenderer(renderer);
-		unsigned char canvas[SCREEN_WIDTH * SCREEN_HEIGHT * 3];
+		/*using heap memory instead of stack memory*/
+		auto *canvas = new unsigned char[SCREEN_WIDTH * SCREEN_HEIGHT * 3];
 		memset(canvas, 0, SCREEN_WIDTH * SCREEN_HEIGHT * 3 * sizeof(unsigned char));
 
 		// initialize N-bodies
 		struct body *bodies = initializeNBodyCuda();
-
 
 		// the FPS indicator
 		LTexture gTextTexture;
@@ -88,26 +89,21 @@ int main(int argc, char *argv[])
 		if (gFont == NULL)
 		{
 			printf("Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError());
-			success = false;
+			success = false; /*not used, TODO: del it*/
 		}
 		std::stringstream timeText;
 		Uint32 startTime = SDL_GetTicks();
 		int frameCount = 0;
 		int fps = 0;
-
 		// check mouse down
 		bool cursor = false;
-
 		//Main loop flag
 		bool quit = false;
-
 		//Event handler
 		SDL_Event e;
-
 		//While application is running
 		while (!quit)
 		{
-
 			//Handle events on queue
 			while (SDL_PollEvent(&e) != 0)
 			{
@@ -125,11 +121,9 @@ int main(int argc, char *argv[])
 					cursor = false;
 				}
 			}
-
 			//Clear screen
 			SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(renderer);
-
 			// Retrieve cursor position, normalize to real space
 			int x, y;
 			SDL_GetMouseState(&x, &y);
@@ -144,22 +138,18 @@ int main(int argc, char *argv[])
 
 			canvasTexture.createFromBuffer(SCREEN_WIDTH, SCREEN_HEIGHT, canvas);
 			canvasTexture.render(0, 0);
-
-
 			// set the FPS counter
 			SDL_Color textColor = {255, 255, 255};
-
 			if (SDL_GetTicks() - startTime > 500)
 			{
 				fps = frameCount * 2;
-
 				// cleanup
 				frameCount = 0;
 				startTime = SDL_GetTicks();
 			}
 
 			timeText.str("");
-			timeText << "FPS: " << fps;
+			timeText << "Bodies: " << NUM_BODIES << ", FPS: " << fps;
 			gTextTexture.loadFromRenderedText(timeText.str().c_str(), textColor);
 			gTextTexture.render(0, 0);
 
@@ -169,8 +159,9 @@ int main(int argc, char *argv[])
 
 			frameCount++;
 		}
-		// free memory for bodies
+		// free memory for bodies and canvas buffer
 		delete[]bodies;
+		delete[]canvas;
 	}
 
 
