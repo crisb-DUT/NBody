@@ -7,10 +7,12 @@
 #include "LTexture.h"
 #include <iostream>
 
-using namespace std;
+//using namespace std;
 
-int
-main(int argc, char *argv[])
+auto *canvas = new unsigned char[SCREEN_WIDTH * SCREEN_HEIGHT * 3];
+//static unsigned char canvas[SCREEN_WIDTH*SCREEN_HEIGHT * 3];
+
+int main(int argc, char *argv[])
 {
 	// Initialize PRNG
 	srand((unsigned int) time(NULL));
@@ -75,7 +77,8 @@ main(int argc, char *argv[])
 		LTexture canvasTexture;
 		canvasTexture.setRenderer(renderer);
 		/*using heap memory instead of stack memory*/
-		auto *canvas = new unsigned char[SCREEN_WIDTH * SCREEN_HEIGHT * 3];
+//		static unsigned char canvas[SCREEN_WIDTH*SCREEN_HEIGHT * 3];
+//		static auto *canvas = new unsigned char[SCREEN_WIDTH * SCREEN_HEIGHT * 3];
 		memset(canvas, 0, SCREEN_WIDTH * SCREEN_HEIGHT * 3 * sizeof(unsigned char));
 
 		// initialize N-bodies
@@ -161,9 +164,9 @@ main(int argc, char *argv[])
 		}
 		// free memory for bodies and canvas buffer
 		delete[]bodies;
-		delete[]canvas;
+
 	}
 
-
+	delete[]canvas;
 	return 0;
 }
