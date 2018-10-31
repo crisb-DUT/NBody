@@ -1,4 +1,5 @@
 #pragma once
+
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <string>
@@ -7,56 +8,59 @@
 //Texture wrapper class
 class LTexture
 {
-	public:
-		//Initializes variables
-		LTexture();
+public:
+	//Initializes variables
+	LTexture();
 
-		//Deallocates memory
-		~LTexture();
+	//Deallocates memory
+	~LTexture();
 
-		// set the renderer
-		void setRenderer(SDL_Renderer* renderer);
+	// set the renderer
+	void setRenderer(SDL_Renderer *renderer);
 
-		// set the font for render
-		void setFont(TTF_Font* font);
+	// set the font for render
+	void setFont(TTF_Font *font);
 
-		//Loads image at specified path
-		bool loadFromFile(std::string path);
+	//Loads image at specified path
+	bool loadFromFile(std::string path);
 
-		//Loads image from a memory buffer
-		bool loadFromMemory(unsigned char* buffer);
-		bool createFromBuffer(int width, int height, unsigned char* buffer);
+	//Loads image from a memory buffer
+	bool loadFromMemory(unsigned char *buffer);
 
-		//Creates image from font string
-		bool loadFromRenderedText(std::string textureText, SDL_Color textColor);
+	bool createFromBuffer(int width, int height, unsigned char *buffer);
 
-		//Deallocates texture
-		void free();
+	//Creates image from font string
+	bool loadFromRenderedText(std::string textureText, SDL_Color textColor);
 
-		//Set color modulation
-		void setColor(Uint8 red, Uint8 green, Uint8 blue);
+	//Deallocates texture
+	void free();
 
-		//Set blending
-		void setBlendMode(SDL_BlendMode blending);
+	//Set color modulation
+	void setColor(Uint8 red, Uint8 green, Uint8 blue);
 
-		//Set alpha modulation
-		void setAlpha(Uint8 alpha);
+	//Set blending
+	void setBlendMode(SDL_BlendMode blending);
 
-		//Renders texture at given point
-		void render(int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
+	//Set alpha modulation
+	void setAlpha(Uint8 alpha);
 
-		//Gets image dimensions
-		int getWidth();
-		int getHeight();
+	//Renders texture at given point
+	void render(int x, int y, SDL_Rect *clip = NULL, double angle = 0.0, SDL_Point *center = NULL,
+	            SDL_RendererFlip flip = SDL_FLIP_NONE);
 
-	private:
-		//The actual hardware texture
-		SDL_Texture* mTexture;
+	//Gets image dimensions
+	int getWidth();
 
-		//Image dimensions
-		int mWidth;
-		int mHeight;
+	int getHeight();
 
-		SDL_Renderer *renderer;
-		TTF_Font *font;
+private:
+	//The actual hardware texture
+	SDL_Texture *mTexture;
+
+	//Image dimensions
+	int mWidth;
+	int mHeight;
+
+	SDL_Renderer *renderer;
+	TTF_Font *font;
 };

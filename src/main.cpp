@@ -5,9 +5,10 @@
 #include <time.h>
 #include "main.h"
 #include "LTexture.h"
+#include "NBody.cuh"
 #include <iostream>
 
-//using namespace std;
+using namespace std;
 
 auto *canvas = new unsigned char[SCREEN_WIDTH * SCREEN_HEIGHT * 3];
 //static unsigned char canvas[SCREEN_WIDTH*SCREEN_HEIGHT * 3];
@@ -16,6 +17,11 @@ int main(int argc, char *argv[])
 {
 	// Initialize PRNG
 	srand((unsigned int) time(NULL));
+	if(argc != 2)
+	{
+		cout<<"Using: ./Nbody_Linux 0 or ./Nbody_Linux 1"<<endl;
+		return 0;
+	}
 
 	// Define common variables for SDL rendering
 	SDL_Window *window = NULL;
@@ -76,13 +82,11 @@ int main(int argc, char *argv[])
 		// prepare the materials for rendering the main canvas (reading from memory)
 		LTexture canvasTexture;
 		canvasTexture.setRenderer(renderer);
-		/*using heap memory instead of stack memory*/
-//		static unsigned char canvas[SCREEN_WIDTH*SCREEN_HEIGHT * 3];
-//		static auto *canvas = new unsigned char[SCREEN_WIDTH * SCREEN_HEIGHT * 3];
-		memset(canvas, 0, SCREEN_WIDTH * SCREEN_HEIGHT * 3 * sizeof(unsigned char));
-
+		/*Using CUDA Unified Memory to automatically handle memory operation,
+		 * such that we can parallel rasterasize function*/
+		unsigned char* canvas = initCanvas();
 		// initialize N-bodies
-		struct body *bodies = initializeNBodyCuda();
+		struct body *bodies = initializeNBodyCuda(argv[1][0]);
 
 		// the FPS indicator
 		LTexture gTextTexture;
@@ -130,9 +134,9 @@ int main(int argc, char *argv[])
 			// Retrieve cursor position, normalize to real space
 			int x, y;
 			SDL_GetMouseState(&x, &y);
-			double rx, ry;
-			rx = (double) (y) / (double) (SCREEN_WIDTH);
-			ry = (double) (x) / (double) (SCREEN_HEIGHT);
+			float rx, ry;
+			rx = (float) (y) / (float) (SCREEN_WIDTH);
+			ry = (float) (x) / (float) (SCREEN_HEIGHT);
 			rx = rx * 2 - 1;
 			ry = ry * 2 - 1;
 
@@ -155,18 +159,13 @@ int main(int argc, char *argv[])
 			timeText << "Bodies: " << NUM_BODIES << ", FPS: " << fps;
 			gTextTexture.loadFromRenderedText(timeText.str().c_str(), textColor);
 			gTextTexture.render(0, 0);
-
-
 			//Update screen
 			SDL_RenderPresent(renderer);
-
 			frameCount++;
 		}
 		// free memory for bodies and canvas buffer
-		delete[]bodies;
-
+		freeCudaMem(bodies);
+		freeCudaMem(canvas);
 	}
-
-	delete[]canvas;
 	return 0;
 }
