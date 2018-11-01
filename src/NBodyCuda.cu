@@ -66,7 +66,7 @@ struct body *initializeNBodyCuda(char method)
 			bodies[i].m = getRandom(0,1.0);
 			bodies[i].x = 0;
 			bodies[i].y = 0;
-			auto radius = getRandom(0,0.05);
+			auto radius = getRandom(0,0.085);
 			auto theta = getRandom(0,2*PI);
 			bodies[i].vx = radius*cos(theta);
 			bodies[i].vy = radius*sin(theta);
@@ -149,7 +149,7 @@ float2 bodyBodyInteraction(body selfBody, body body2, float2 acc)
 	r.x = body2.x - selfBody.x;
 	r.y = body2.y - selfBody.y;
 	float disSquare = r.x * r.x + r.y * r.y + eps * eps;
-	float tmp = G * body2.m / rsqrt(disSquare * disSquare * disSquare);
+	float tmp = G * body2.m * rsqrt(disSquare * disSquare * disSquare);
 	acc.x += r.x * tmp;
 	acc.y += r.y * tmp;
 	return acc;

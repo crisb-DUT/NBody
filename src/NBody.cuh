@@ -23,7 +23,7 @@ struct body {
 #define G  (1e-7)
 
 // cursor weight
-const float cursor_weight = (8*NUM_BODIES);
+const float cursor_weight = (0.5*NUM_BODIES);
 
 // reflection factor
 // lose speed if collide to the boundary
